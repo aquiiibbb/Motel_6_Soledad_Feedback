@@ -126,7 +126,7 @@ export default function ReviewHomePage() {
 
                 {/* Footer with Logo */}
                 <div className="card-footer">
-                    <h2 className="footer-hotel-name">Motel 6 Soledad</h2>
+                    <h2 className="footer-hotel-name">Motel 6 </h2>
                     <p className="footer-hotel-tagline">1155 Front Street, Soledad</p>
                     <p className="footer-hotel-tagline"><span style={{color:"white"}}>📞</span> 8316783833</p>
                 </div>
