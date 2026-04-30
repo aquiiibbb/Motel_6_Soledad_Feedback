@@ -218,7 +218,7 @@
 
 .qr-container {
     background: transparent;
-    padding: 2px;
+    padding: 5px;
     border-radius: 18px;
     border: 1px solid #186fb8;
     display: flex;
@@ -236,11 +236,11 @@
 .qr-code-image {
     display: block;
     border-radius: 12px;
-    width: 245px;
-    height: 245px;
+    width: 270px;
+    height: 270px;
     object-fit: cover;
     object-position: center;
-    transform: scale(1.6);
+    transform: scale(1.8);
     padding: 40px;
 }
 
@@ -401,8 +401,8 @@
     }
 
     .qr-code-image {
-        width: 180px;
-        height: 180px;
+        width: 210px;
+        height: 210px;
     }
 
     .camera-feed {
