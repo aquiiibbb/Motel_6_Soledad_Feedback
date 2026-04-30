@@ -10,6 +10,7 @@ function Page() {
   const [submitted, setSubmitted] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [ratingFixed, setRatingFixed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // User info state
   const [userInfo, setUserInfo] = useState({
@@ -28,25 +29,24 @@ function Page() {
   };
 
   const handleRating = (r) => {
-    // Only allow rating change if not fixed
     if (ratingFixed) return;
 
     setRating(r);
     setRatingFixed(true);
 
     if (r >= 4) {
-      // High rating (4-5 stars) - direct redirect to Google Reviews
+      // High rating - redirect to Google Reviews
       setTimeout(() => {
         window.location.href = "https://g.page/r/CZuCqInf65YPEBM/review";
       }, 500);
     } else if (r <= 3) {
-      // Low rating (1-3 stars) - show user form
+      // Low rating - show feedback form
       setShowUserForm(true);
     }
   };
 
   const handleUserSubmit = async () => {
-    // Validate user info
+    // Validation
     if (!userInfo.name.trim()) {
       alert("Please enter your name.");
       return;
@@ -62,26 +62,24 @@ function Page() {
       return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(userInfo.email)) {
       alert("Please enter a valid email address.");
       return;
     }
 
-    // Phone validation
     if (userInfo.phone.length < 10) {
       alert("Please enter a valid phone number.");
       return;
     }
 
-    // For low ratings (1-3), require feedback message
     if (!message.trim()) {
       alert("Please enter your feedback message.");
       return;
     }
 
-    // Submit low rating feedback
+    setIsSubmitting(true);
+
     try {
       const feedbackData = {
         name: userInfo.name.trim(),
@@ -91,15 +89,38 @@ function Page() {
         message: message.trim()
       };
 
-      console.log("Submitting low rating feedback:", feedbackData);
+      console.log("Submitting feedback:", feedbackData);
 
-      const response = await axios.post("https://motel-6-soledad-backend.onrender.com/feedback", feedbackData);
-      console.log("Low rating saved:", response.data);
+      const response = await axios.post(
+        "https://motel-6-soledad-backend.onrender.com/feedback",
+        feedbackData,
+        {
+          timeout: 60000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
+      console.log("Feedback saved:", response.data);
       setSubmitted(true);
+
     } catch (error) {
       console.error("Error submitting feedback:", error);
-      alert("Failed to submit feedback. Please try again.");
+
+      let errorMessage = "Failed to submit feedback. Please try again.";
+
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = "Request timed out. Server might be starting up - please try again in a moment.";
+      } else if (error.response?.status === 502) {
+        errorMessage = "Server is temporarily unavailable. Please try again in a moment.";
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -111,6 +132,7 @@ function Page() {
     setShowUserForm(false);
     setHoveredRating(0);
     setRatingFixed(false);
+    setIsSubmitting(false);
   };
 
   if (submitted) {
@@ -134,7 +156,6 @@ function Page() {
         <h1>How was your stay?</h1>
         <p className="subtitle">Please rate your experience with us</p>
 
-        {/* Rating Section - Shows first */}
         {!showUserForm && (
           <div className="rating-section">
             <p className="rating-text">Rate your experience:</p>
@@ -157,7 +178,6 @@ function Page() {
           </div>
         )}
 
-        {/* User Details Section - Only for low ratings (1-3) */}
         {showUserForm && rating <= 3 && (
           <div className="user-details">
             <input
@@ -168,6 +188,7 @@ function Page() {
               onChange={handleUserInfo}
               className="input-field"
               required
+              disabled={isSubmitting}
             />
             <input
               type="email"
@@ -177,6 +198,7 @@ function Page() {
               onChange={handleUserInfo}
               className="input-field"
               required
+              disabled={isSubmitting}
             />
             <input
               type="tel"
@@ -186,9 +208,9 @@ function Page() {
               onChange={handleUserInfo}
               className="input-field"
               required
+              disabled={isSubmitting}
             />
 
-            {/* Fixed Rating Display - Only selected stars, centered */}
             <div className="rating-display">
               <p className="rating-text">Your rating:</p>
               <div className="selected-stars">
@@ -199,7 +221,6 @@ function Page() {
               <p className="rating-label">{labels[rating]}</p>
             </div>
 
-            {/* Feedback Form - Only for low ratings */}
             <div className="feedback-form">
               <h3>We're sorry to hear that! What went wrong?</h3>
               <textarea
@@ -208,11 +229,16 @@ function Page() {
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
                 required
+                disabled={isSubmitting}
               />
             </div>
 
-            <button className="btn" onClick={handleUserSubmit}>
-              Submit Feedback
+            <button
+              className="btn"
+              onClick={handleUserSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Feedback"}
             </button>
           </div>
         )}
