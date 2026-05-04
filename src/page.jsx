@@ -28,17 +28,42 @@ function Page() {
     });
   };
 
-  const handleRating = (r) => {
+  const handleRating = async (r) => {
     if (ratingFixed) return;
 
     setRating(r);
     setRatingFixed(true);
 
     if (r >= 4) {
-      // High rating - redirect to Google Reviews
+      // High rating - save to database first, then redirect to Google Reviews
+      try {
+        const ratingData = {
+          rating: r,
+          message: "Redirected to Google Reviews",
+          name: "Anonymous",
+          email: "anonymous@email.com",
+          phone: "000"
+        };
+
+        await axios.post(
+          "https://motel-6-soledad-backend.onrender.com/feedback",
+          ratingData,
+          {
+            timeout: 10000,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      } catch (error) {
+        console.error("Error saving high rating:", error);
+        // Continue with redirect even if save fails
+      }
+
+      // Redirect after saving
       setTimeout(() => {
         window.location.href = "https://g.page/r/CZuCqInf65YPEBM/review";
-      }, 500);
+      }, 100);
     } else if (r <= 3) {
       // Low rating - show feedback form
       setShowUserForm(true);
