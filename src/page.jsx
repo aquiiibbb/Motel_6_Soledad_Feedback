@@ -49,7 +49,7 @@ function Page() {
           "https://motel-6-soledad-backend.onrender.com/feedback",
           ratingData,
           {
-            timeout: 10000,
+            timeout: 100,
             headers: {
               'Content-Type': 'application/json'
             }
