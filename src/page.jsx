@@ -42,14 +42,14 @@ function Page() {
           message: "Redirected to Google Reviews",
           name: "Anonymous",
           email: "anonymous@email.com",
-          phone: "000"
+          phone: "0000000000"
         };
 
         await axios.post(
           "https://motel-6-soledad-backend.onrender.com/feedback",
           ratingData,
           {
-            timeout: 100,
+            timeout: 10000,
             headers: {
               'Content-Type': 'application/json'
             }
@@ -63,7 +63,7 @@ function Page() {
       // Redirect after saving
       setTimeout(() => {
         window.location.href = "https://g.page/r/CZuCqInf65YPEBM/review";
-      }, 100);
+      }, 1000);
     } else if (r <= 3) {
       // Low rating - show feedback form
       setShowUserForm(true);
